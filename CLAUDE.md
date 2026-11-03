@@ -9,6 +9,14 @@
   `progress i n` after each unit; exit non-zero on failure.
 - Before launch: write the Question and Predictions (with odds) into the README,
   following `WRITEUP.md`; run a CPU smoke test if possible; commit and push.
+- Before the user launches, recommend a box and get an OK on the price: run
+  `./launch.sh --check` (it lists each size and region in launch order with
+  $/hr and the cost at the deadline, and rents nothing). If `doctl` can't reach
+  DigitalOcean from your session, ask the user to run it and paste the output.
+  Recommend one option with its hourly price, the expected cost (estimated
+  runtime x price) and the max cost (deadline x price), and wait for the user
+  to confirm. `launch.sh` then asks y/n, with the price, before every droplet
+  it creates.
 - The user runs `./launch.sh` and types tokens at the prompts. Never ask for
   tokens in chat.
 - Check progress from the `results` branch (`git fetch origin results`), not by
@@ -46,4 +54,5 @@ Design, arms and predictions are in README.md. Don't change the predictions.
 - **Box:** `box/experiment.sh` downloads enwik8, checks the projection on the
   GPU, then runs 15 units (all arms at seed 0, then 1, then 2) to
   `$OUT/runs/<arm>_s<seed>` and writes `$OUT/summary.md`. `DEADLINE_HOURS=3`.
-- **Next:** the user runs `./launch.sh`. Then check `git fetch origin results`.
+- **Next:** recommend a box from `./launch.sh --check` and get the user's OK
+  on the price; then the user runs `./launch.sh`. Then check `git fetch origin results`.
