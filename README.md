@@ -114,4 +114,18 @@ fixed-threshold version in an otherwise identical attention-only model.
 
 ## Reproduce
 
-_To fill in after the build._
+Code: `polytope/proj.py` (the projections), `polytope/model.py` (the
+attention-only GPT and arms), `train.py` (one run), `scripts/summarize.py`.
+Tests (L1 projection vs a brute-force face enumeration, KKT, identity inside,
+gradcheck; every arm trains a step):
+
+    python -m pytest -q tests
+
+One run, as on the box (enwik8 split 90/10 by `polytope.data.prepare_text`):
+
+    python train.py --data data/enwik8 --out runs/l1_s0 --arm l1 --seed 0 \
+        --steps 5000 --batch_size 64 --block_size 256 --n_layer 6 --n_head 6 \
+        --d_model 384 --eval_every 500 --compile
+
+The full sweep (5 arms × seeds 0, 1, 2) is `box/experiment.sh`, launched on a
+DigitalOcean GPU with `./launch.sh`. Results land on the `results` branch.
