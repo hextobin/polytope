@@ -1,69 +1,73 @@
-# gpu-experiment-template
+# polytope
 
-Run a GPU experiment on a DigitalOcean droplet that sets itself up, pushes
-results to git, and destroys itself. Nothing has to watch it: no terminal,
-no agent session.
+**Question:** in a transformer with no MLP, if the residual stream is forced
+onto a polytope after every attention update, does that help the model, and
+what kind of code does the stream settle into?
 
-## You need
+**Answer (at this scale):** _pending: the run hasn't happened yet._
 
-- A DigitalOcean account with an SSH key uploaded. Put its ID in
-  `experiment.conf` (`doctl compute ssh-key list` shows it).
-- `doctl` (logged in), `jq` and `git` on your machine.
-- Two short-lived tokens per run, typed at `launch.sh`'s prompts and never
-  saved anywhere else:
-  - DigitalOcean: custom scopes **droplet: read + delete**, 1-day expiry.
-  - GitHub fine-grained: the experiment repo only, **Contents: read and write**,
-    7-day expiry.
+## The constraint
 
-## Use it without an agent
+After every attention add (and once on the embeddings), the residual stream is
+normalized and then projected onto a fixed polytope P:
 
-1. On GitHub, click **Use this template** to make a new repo, and clone it.
-2. Add your code. Edit `box/experiment.sh` (what runs on the box; the only box
-   script you change) and `experiment.conf` (sizes, regions, deadline, pip
-   packages).
-3. Write the Question and Predictions sections of `WRITEUP.md` before you
-   know the answer.
-4. Commit and push to `main`.
-5. Run `./launch.sh` and type the tokens at the prompts.
-6. Results show up on the `results` branch every 15 minutes:
-   `git fetch origin results && git show origin/results:logs/run.log | tail`
-7. Afterwards, check `doctl compute droplet list` is empty, and revoke the tokens.
-8. Finish `WRITEUP.md` and make it your `README.md`.
+    x ← Proj_P(RMSNorm(x + attn(x)))
 
-## Use it with Claude Code (or another agent)
+The RMSNorm comes first on purpose. Attention reads through LayerNorm, so it
+can't see scale. Without the norm, the model could shrink the stream until it
+sat inside P, and the projection would never do anything. With the norm, the
+only way to avoid the projection is for the stream to already have P's shape.
 
-The box works the same way; the agent does the writing and checking around it.
-`CLAUDE.md` holds the agent's rules. Claude Code reads it automatically.
-`AGENTS.md` points to the same file for other agents.
+- **L1 ball** (cross-polytope), radius r = d/4: an exact projection by sorting
+  and soft-thresholding. One threshold is shared by all coordinates, so new
+  attention output and old content compete for a fixed budget. The result has
+  exact zeros. At initialization it keeps about 44% of coordinates for a dense
+  input.
+- **Box** [−1, 1]^d: clipping. It works per coordinate (it's hardtanh), and
+  its vertices are dense ±1 codes. It's the control for the L1 ball's coupling.
 
-1. Make a repo from the template, clone it, and start a session in that folder.
-2. Describe the experiment. The agent writes the code, `box/experiment.sh` and
-   `experiment.conf`, smoke-tests them on CPU, and writes the Question and
-   Predictions into the README before launch.
-3. You make the two tokens and run `./launch.sh` yourself. The agent never asks
-   for tokens in chat.
-4. The agent checks progress from the `results` branch, not by logging in to
-   the box. Nothing depends on the session staying open.
-5. After the run, the agent confirms the droplet is gone, writes the results up
-   in the `WRITEUP.md` format, and (when you publish) drafts the repo's About
-   box.
+Learned faces are left out. With up to d orthogonal faces the projection is
+exactly `x − Aᵀ relu(Ax − b)`, a ReLU MLP whose output weights are tied to its
+input weights, which would bring back the MLP. With more faces it needs a
+quadratic-program solver.
 
-## What the box does
+## Setup
 
-| When | What |
+- **Model and data:** polydeq's byte-level GPT (6 layers, d = 384) on enwik8,
+  5000 steps at batch 64 × 256 bytes. Metric: validation bits per byte.
+- **Arms**, all with the same structure (attention reads through a pre-norm,
+  and the stream is renormalized after each add):
+  - `floor`: attention only, RMSNorm after each add, no projection
+  - `box`: floor, then clip to [−1, 1]
+  - `l1`: floor, then project onto the L1 ball of radius d/4
+  - `ceiling`: floor plus a GELU MLP sublayer. It has more parameters and is a
+    reference only.
+- **Also logged, per layer:** how often the projection changes the vector, the
+  fraction of coordinates that are nonzero (`l1`) or clipped (`box`), and
+  throughput.
+- 3 seeds per arm, one 48GB GPU, about an hour in all. A difference counts only
+  if it exceeds twice the seed standard deviation.
+
+## Predictions
+
+Written down before any run:
+
+| outcome | predicted odds |
 |---|---|
-| Boot | Arms the dead-man timer (hard cap `DEADLINE_HOURS`), starts `exp-run.service` |
-| Every 15 min | `sync.sh` pushes `/root/logs` and `out/` to the `results` branch |
-| Every 5 min | `deadman.sh`: destroys the box after the deadline or if `control/stop` is on `main`; if the experiment service died without finishing, pulls the deadline in to 1 hour |
-| During the run | `progress i n` tightens the deadline to 1.5× the projected finish + 20 min |
-| Success | Final push, then self-destruct (or wait `KEEP_AFTER_DONE_MIN`) |
-| Failure | Deadline pulled in to 1 hour so you can fix it; then self-destruct |
+| `l1` beats `floor` | ~55% |
+| `box` beats `floor` | ~50% |
+| `l1` beats `box` (the coupling helps) | ~40% |
+| `l1` closes at least half the gap from `floor` to `ceiling` | ~10% |
+| every seed of `l1` and `box` trains without diverging | ~80% |
+| by the end of `l1`, the stream is sparse enough that the projection changes < 20% of tokens | ~25% |
+| by the end of `l1`, the median fraction of nonzero coordinates is < 25% | ~35% |
 
-**Kill it remotely:** push a file named `control/stop` to `main`. It's gone
-within 5 minutes. Delete the file before the next launch (`launch.sh` refuses
-while it exists).
+## Prior art
 
-**Fix a crash by hand** (SSH as root): fix, push, `git -C /root/exp pull`,
-`systemctl restart exp-run.service`, then write a later epoch to
-`/root/deadline` if you need more time. Finished units are skipped if
-`experiment.sh` is resumable.
+To check before launch: OptNet (Amos & Kolter, 2017); sparsemax and entmax
+(projections onto the simplex); the polytope lens (Black et al., 2022). No
+search for this exact setup has been done yet.
+
+## Reproduce
+
+_To fill in after the build._

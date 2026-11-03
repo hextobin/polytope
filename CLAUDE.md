@@ -27,3 +27,28 @@
      `gh repo edit hextobin/<repo> --description "..." --add-topic a,b,c`.
      Run it if `gh` is available and logged in; otherwise (e.g. in a cloud
      session) give the user the ready-to-paste command.
+
+## Handoff: design done (2026-11-02), next phase is build
+
+The design, arms and predictions are in README.md. Don't change the predictions.
+
+- **Code base:** reuse hextobin/polydeq (clone it from GitHub). Take its
+  byte-level GPT, enwik8 data prep, `train.py`, and the sweep and summarize
+  scripts. Drop the MLP, and add an `--arm` with values floor|box|l1|ceiling.
+- **Structure for every arm:** attention reads through a pre-norm, and after
+  each add `x ← P(RMSNorm(x + attn(x)))`. Also apply it once to the
+  embeddings, then a final norm and the unembedding. `ceiling` adds a GELU MLP
+  sublayer, followed by RMSNorm only.
+- **P:** floor = identity; box = clamp(−1, 1); l1 = exact projection onto the
+  L1 ball of radius d/4 (sort, cumsum, shared threshold τ, soft-threshold;
+  identity if already inside).
+- **Logging per layer, at each eval:** fraction of tokens the projection
+  changes; fraction of nonzero coordinates (l1) or clipped coordinates (box).
+- **Tests:** check the L1 projection against a brute-force reference (the
+  output's L1 norm ≤ r, KKT conditions hold, the input is unchanged when it's
+  already inside), and run gradcheck.
+- **Run plan:** 4 arms × seeds 0,1,2 at 5000 steps, each run one resumable
+  unit in `box/experiment.sh`. Set `DEADLINE_HOURS` to about 3.
+- **Before launch:** do the prior-art check listed in the README, run a CPU
+  smoke test of all arms for a few steps, then commit and push. The user runs
+  `./launch.sh`.
