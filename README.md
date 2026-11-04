@@ -100,8 +100,10 @@ seed makes its sd 1.42. No run had a non-finite step.
    seed isn't enough to call this.
 5. **The stream didn't settle into a sparse code that fits the budget.** At the
    end of `l1` the projection still changed 100% of tokens, with a median of 35%
-   of coordinates nonzero (25% to 43% by layer). Deep layers got denser with
-   training: the last layer went from about 12% nonzero at step 0 to about 40%.
+   of coordinates nonzero (25% to 43% by layer). The last layer rose from about
+   12% nonzero at step 0 to about 40%, but almost all of that came in the first
+   500 steps, `shrink` did the same (5% to 38%), and the per-layer sparsity then
+   barely moved. So this looks like an initialization effect, not a learned code.
 6. **Projection cost `l1` about 3× the throughput.** It ran at 0.95M tokens/s
    against about 2.7M, from sorting on every call.
 
