@@ -62,6 +62,34 @@ fi
 read -rsp "DigitalOcean token (droplet read + delete): " DO_TOKEN; echo
 read -rsp "GitHub token ($REPO contents read/write): " GH_TOKEN; echo
 
+# Test both tokens before renting. On the box a bad GitHub token stops the clone
+# before setup.sh, and a bad DO token can't delete the droplet, so either one
+# leaves a box billing with nothing to stop it. Nothing here changes anything:
+# droplet 0 doesn't exist, so a working token gets 404 and a token without the
+# delete scope gets 401/403. Tokens go through stdin to stay out of `ps`.
+do_status() { # method path
+  curl -sS -m 20 -o /dev/null -w '%{http_code}' -K - -X "$1" "https://api.digitalocean.com$2" \
+    <<<"header = \"Authorization: Bearer $DO_TOKEN\"" || true
+}
+gh_status() { # write access is what the receive-pack handshake requires
+  curl -sS -m 20 -o /dev/null -w '%{http_code}' -K - \
+    "https://github.com/$REPO.git/info/refs?service=git-receive-pack" \
+    <<<"user = \"x-access-token:$GH_TOKEN\"" || true
+}
+code=$(do_status GET "/v2/droplets?per_page=1")
+if [ "$code" != 200 ]; then
+  echo "DigitalOcean token can't read droplets (HTTP $code). Nothing was created." >&2; exit 1
+fi
+code=$(do_status DELETE "/v2/droplets/0")
+case $code in
+  401|403|000) echo "DigitalOcean token can't delete droplets (HTTP $code). Nothing was created." >&2; exit 1 ;;
+esac
+code=$(gh_status)
+if [ "$code" != 200 ]; then
+  echo "GitHub token can't push to $REPO (HTTP $code). Nothing was created." >&2; exit 1
+fi
+echo "Tokens OK: DigitalOcean read + delete, GitHub push to $REPO."
+
 UD=$(mktemp)
 trap 'rm -f "$UD"' EXIT
 chmod 600 "$UD"
