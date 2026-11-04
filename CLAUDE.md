@@ -61,20 +61,21 @@ Design, arms and predictions are in README.md. Don't change the predictions.
   GPU, then runs 15 units (all arms at seed 0, then 1, then 2) to
   `$OUT/runs/<arm>_s<seed>` and writes `$OUT/summary.md`. `DEADLINE_HOURS=3`.
 
-## Handoff: first launch cancelled (2026-11-04), next phase is design
+## Handoff: launched (2026-11-04), next phase is analysis
 
-- **Why:** the user cancelled to restart with an agent on the box that they can
-  check in with periodically. Droplet list confirmed empty; no results were kept.
-- **Design settled:** no box script changes and no API key. After launch, the
-  user saves an SSH connection in the Claude app to the new droplet's IP, and a
-  session is started there with `start_session` (`target: "ssh"`, `host` from
-  `list_start_targets`, repo at `/root/exp`). It runs on the box under the
-  user's plan; they check in by opening it from the sidebar. This matches their
-  earlier `concepts-box` session. Self-destruct and the deadline stay independent
-  of it. The session ends with the box.
-- **Capacity:** the 48GB sizes and H100 had no regions on 2026-11-04;
-  `gpu-h200x1-141gb` (atl1, nyc2, $4.47/hr) did and launched. If the GPU differs
-  from the README's "one 48GB GPU", name it in the write-up. Don't change the
-  predictions.
-- **`doctl`:** can't run in the sandbox, so the user runs it. Get a fresh price OK
-  before relaunching.
+- **Box:** `polytope-run`, `gpu-h100x1-80gb` in ams3 at $4.41/hr, max $13.23.
+  Hard deadline 04:55 UTC. This was the second launch; the first was cancelled.
+- **On-box session:** `polytope-box`, on the SSH connection `root@174.138.0.12`.
+  It ends with the box, and the saved connection can be removed afterwards.
+- **First crash:** both boxes died on the first training step because `Python.h`
+  was missing for `--compile`. Fixed by hand on this box, then the user restored
+  the deadline and restarted `exp-run`; `box/run.sh` now installs `python3-dev`
+  here and in the template. On the restart, training past step 1 was not yet
+  confirmed when this was written.
+- **`results` branch:** the first logs there include the cancelled box's, so
+  the early `floor_s0` files and `self_destruct.log` are from that run.
+- **Write-up:** the setup line says "one 48GB GPU"; name the H100 instead. Don't
+  change the predictions.
+- **Next:** check `git fetch origin results`. After the run, the user confirms
+  `doctl compute droplet list` is empty (doctl can't run in the sandbox), then
+  rewrite README.md per `WRITEUP.md`.
