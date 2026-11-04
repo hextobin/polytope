@@ -4,7 +4,13 @@
 onto a polytope after every attention update, does that help the model, and
 what kind of code does the stream settle into?
 
-**Answer (at this scale):** _pending: the run hasn't happened yet._
+**Answer (at this scale):** unclear. The L1 ball shows a hint of more reliable
+training, but no gain in score. It was the only constraint that trained on all 3 seeds
+(1.86 ± 0.05 bits per byte), but it only tied the unconstrained attention model
+on the seeds where that model trained (1.88). The box stayed stuck at about
+5 bits per byte on every seed. With 3 seeds, no arm passes the 2 sd rule against
+`floor`, and the stream never settled inside the L1 ball, so the projection
+stayed active on every token.
 
 ## The constraint
 
@@ -53,24 +59,74 @@ quadratic-program solver.
 - **Also logged, per layer:** how often the projection changes the vector, the
   fraction of coordinates that are nonzero (`l1`) or clipped (`box`), and
   throughput.
-- 3 seeds per arm, one 48GB GPU, about 1.5 hours in all. A difference counts only
-  if it exceeds twice the seed standard deviation.
+- 3 seeds per arm, one NVIDIA H100 (DigitalOcean `gpu-h100x1-80gb`, $4.41/hr),
+  about 14 minutes of runs and 20 minutes on the box, so about $1.50, not
+  counting a cancelled first box. A difference counts only if it exceeds twice
+  the larger seed standard deviation.
 
-## Predictions
+## Results (mean ± sd over 3 seeds)
 
-Written down before any run:
+| arm | val bpb | vs `floor` | seeds at each value | seeds trained | tokens/s |
+|---|---|---|---|---|---|
+| `ceiling` | 1.583 ± 0.026 | -1.120 | 1.61, 1.58, 1.56 | 3/3 | 1.77M |
+| `l1` | 1.865 ± 0.054 | -0.838 | 1.91, 1.80, 1.88 | 3/3 | 0.95M |
+| `floor` | 2.702 ± 1.417 | - | 4.34, 1.87, 1.90 | 2/3 | 2.74M |
+| `shrink` | 3.113 ± 1.186 | +0.411 | 4.15, 1.82, 3.38 | 1/3 | 2.75M |
+| `box` | 5.069 ± 0.024 | +2.367 | 5.08, 5.04, 5.08 | 0/3 | 2.70M |
 
-| outcome | predicted odds |
-|---|---|
-| `l1` beats `floor` | ~55% |
-| `box` beats `floor` | ~50% |
-| `l1` beats `box` (the coupling helps) | ~40% |
-| `l1` beats `shrink` (the per-token budget helps, beyond sparsifying) | ~35% |
-| `shrink` beats `floor` | ~55% |
-| `l1` closes at least half the gap from `floor` to `ceiling` | ~10% |
-| every seed of `l1` and `box` trains without diverging | ~80% |
-| by the end of `l1`, the stream is sparse enough that the projection changes < 20% of tokens | ~25% |
-| by the end of `l1`, the median fraction of nonzero coordinates is < 25% | ~35% |
+Bits per byte on validation; lower is better, and 8 is a uniform guess. "Trained"
+means under 2 bpb at step 5000. `ceiling` has 10.8M parameters; the others have
+3.75M. No difference from `floor` passes the 2 sd rule, because `floor`'s stuck
+seed makes its sd 1.42. No run had a non-finite step.
+
+## Findings
+
+1. **Training reliability separates the arms more than final score does.** Runs
+   either reached 3 to 4 bpb by step 500 or sat near 5 bpb. `box` never left
+   that plateau (0/3). `floor` seed 0 and `shrink` seeds 0 and 2 left it slowly,
+   and were still improving at step 5000.
+2. **`l1` matches `floor`, not beats it.** Its mean gain of 0.84 bpb comes from
+   `floor`'s one stuck seed. Against the two `floor` seeds that trained
+   (mean 1.88), `l1` is 0.02 bpb better, well inside the seed spread. Whether
+   `l1` really prevents the plateau needs more than 3 seeds.
+3. **`box` is clearly worse than `l1`.** The gap is 3.20 bpb, far past 2 sd, and
+   it's the only constrained comparison that clears the rule. About 47% of
+   coordinates were clipped at the end. The 5 bpb level is likely what byte
+   frequencies alone give, but that entropy wasn't measured here, and neither
+   was why `box` stalls.
+4. **A fixed threshold can do as well as the budget, but less reliably.**
+   `shrink`'s one trained seed (1.82) was as good as the best `l1` seed (1.80),
+   with the same operation at 3× the speed. Its other two seeds got stuck. One
+   seed isn't enough to call this.
+5. **The stream didn't settle into a sparse code that fits the budget.** At the
+   end of `l1` the projection still changed 100% of tokens, with a median of 35%
+   of coordinates nonzero (25% to 43% by layer). Deep layers got denser with
+   training: the last layer went from about 12% nonzero at step 0 to about 40%.
+6. **Projection cost `l1` about 3× the throughput.** It ran at 0.95M tokens/s
+   against about 2.7M, from sorting on every call.
+
+## Predictions vs outcome
+
+| outcome | predicted odds | happened? |
+|---|---|---|
+| `l1` beats `floor` | ~55% | Not by the rule: 0.84 lower on the mean, tied on trained seeds |
+| `box` beats `floor` | ~50% | No: 2.37 worse on the mean |
+| `l1` beats `box` (the coupling helps) | ~40% | Yes: 3.20 better, past 2 sd |
+| `l1` beats `shrink` (the per-token budget helps, beyond sparsifying) | ~35% | Not by the rule: 1.25 lower on the mean, but `shrink`'s trained seed matched `l1`'s best |
+| `shrink` beats `floor` | ~55% | No: 0.41 worse on the mean |
+| `l1` closes at least half the gap from `floor` to `ceiling` | ~10% | Not really: 75% on means, but 6% against `floor`'s trained seeds |
+| every seed of `l1` and `box` trains without diverging | ~80% | Yes as worded: no non-finite steps, though `box` never learned past the plateau |
+| by the end of `l1`, the stream is sparse enough that the projection changes < 20% of tokens | ~25% | No: 100% |
+| by the end of `l1`, the median fraction of nonzero coordinates is < 25% | ~35% | No: 35% |
+
+## Next, if revisited
+
+- Run `floor`, `l1` and `shrink` on 10+ more seeds. Each run takes 30 to 90
+  seconds, and this settles whether `l1` really avoids the plateau.
+- Find out what the plateau is: measure enwik8's byte entropy, and check whether
+  a lower learning rate frees the stuck seeds.
+- Train longer, to see whether the stuck seeds catch up and whether `l1`
+  keeps up with `floor`.
 
 ## Prior art
 
@@ -128,4 +184,6 @@ One run, as on the box (enwik8 split 90/10 by `polytope.data.prepare_text`):
         --d_model 384 --eval_every 500 --compile
 
 The full sweep (5 arms × seeds 0, 1, 2) is `box/experiment.sh`, launched on a
-DigitalOcean GPU with `./launch.sh`. Results land on the `results` branch.
+DigitalOcean GPU with `./launch.sh`. Logs, per-seed metrics and `summary.md` are
+on the `results` branch under `out/`. Early `floor_s0` commits there come from a
+cancelled first box.
