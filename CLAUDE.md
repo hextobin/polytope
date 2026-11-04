@@ -59,9 +59,13 @@ Design, arms and predictions are in README.md. Don't change the predictions.
 
 - **Why:** the user cancelled to restart with an agent on the box that they can
   check in with periodically. Droplet list confirmed empty; no results were kept.
-- **Design still open:** how the agent runs, authenticates and is reached. Until
-  it's settled, keep self-destruct and the deadline working without any agent.
-  The change belongs in hextobin/gpu-experiment-template.
+- **Design settled:** no box script changes and no API key. After launch, the
+  user saves an SSH connection in the Claude app to the new droplet's IP, and a
+  session is started there with `start_session` (`target: "ssh"`, `host` from
+  `list_start_targets`, repo at `/root/exp`). It runs on the box under the
+  user's plan; they check in by opening it from the sidebar. This matches their
+  earlier `concepts-box` session. Self-destruct and the deadline stay independent
+  of it. The session ends with the box.
 - **Capacity:** the 48GB sizes and H100 had no regions on 2026-11-04;
   `gpu-h200x1-141gb` (atl1, nyc2, $4.47/hr) did and launched. If the GPU differs
   from the README's "one 48GB GPU", name it in the write-up. Don't change the
