@@ -11,7 +11,7 @@ exec >>"$LOGS/run.log" 2>&1
 note "installing python packages: $PIP_PACKAGES"
 # First boot often has unattended upgrades holding the apt lock; wait for it.
 apt-get -qq -o DPkg::Lock::Timeout=900 update
-apt-get -qq -o DPkg::Lock::Timeout=900 install -y python3-venv >/dev/null
+apt-get -qq -o DPkg::Lock::Timeout=900 install -y python3-venv python3-dev >/dev/null
 if ! { [ -x .venv/bin/python ] || python3 -m venv .venv; } ||
    ! .venv/bin/pip -q install $PIP_PACKAGES; then
   exec "$EXP/box/self_destruct.sh" "python setup failed"
