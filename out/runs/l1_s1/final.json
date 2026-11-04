@@ -1,0 +1,12 @@
+{
+  "arm": "l1",
+  "seed": 1,
+  "n_params": 3750144,
+  "steps_done": 5000,
+  "final_val_loss": 1.2508327126502992,
+  "final_val_bpb": 1.8045701515222765,
+  "elapsed_s": 86.70688390731812,
+  "tokens_per_s": 944792.3429881892,
+  "nonfinite_steps": 0,
+  "first_step_s": 2.2
+}

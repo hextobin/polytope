@@ -1,0 +1,12 @@
+{
+  "arm": "floor",
+  "seed": 1,
+  "n_params": 3750144,
+  "steps_done": 5000,
+  "final_val_loss": 1.2956356763839723,
+  "final_val_bpb": 1.8692071651179747,
+  "elapsed_s": 29.711477994918823,
+  "tokens_per_s": 2757183.604733825,
+  "nonfinite_steps": 0,
+  "first_step_s": 1.9
+}

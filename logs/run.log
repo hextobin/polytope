@@ -1,4 +1,4 @@
-[01:38:50] installing python packages: torch numpy
+[01:55:04] installing python packages: torch numpy
 debconf: unable to initialize frontend: Dialog
 debconf: (TERM is not set, so the dialog frontend is not usable.)
 debconf: falling back to frontend: Readline
@@ -23,13 +23,13 @@ No user sessions are running outdated binaries.
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
 name, memory.total [MiB]
-NVIDIA H200, 143771 MiB
-[01:39:57] starting experiment.sh
-[01:39:57] downloading enwik8
-[01:39:59] data ready
-proj check ok, nonzero frac 0.43774670362472534
-[01:40:01] start floor seed 0 (1/15)
-[01:40:10] train.py failed for floor seed 0
+NVIDIA H100 80GB HBM3, 81559 MiB
+[01:55:56] starting experiment.sh
+[01:55:56] downloading enwik8
+[01:56:00] data ready
+proj check ok, nonzero frac 0.4387308955192566
+[01:56:02] start floor seed 0 (1/15)
+[01:56:11] train.py failed for floor seed 0
                    ^^^^^^^^^^^^
   File "/root/exp/.venv/lib/python3.12/site-packages/triton/runtime/driver.py", line 33, in default
     self._default = _create_driver()
@@ -56,9 +56,40 @@ proj check ok, nonzero frac 0.43774670362472534
     subprocess.check_call(cc_cmd, stdout=subprocess.DEVNULL)
   File "/usr/lib/python3.12/subprocess.py", line 413, in check_call
     raise CalledProcessError(retcode, cmd)
-torch._inductor.exc.InductorError: CalledProcessError: Command '['/usr/bin/gcc', '/root/exp/.venv/lib/python3.12/site-packages/triton/backends/nvidia/driver.c', '-O3', '-shared', '-fPIC', '-Wno-psabi', '-o', '/tmp/tmplv_h_mu1/cuda_utils.cpython-312-x86_64-linux-gnu.so', '-l:libcuda.so.1', '-L/root/exp/.venv/lib/python3.12/site-packages/triton/backends/nvidia/lib', '-L/lib/x86_64-linux-gnu', '-I/root/exp/.venv/lib/python3.12/site-packages/triton/backends/nvidia/include', '-I/tmp/tmplv_h_mu1', '-I/usr/include/python3.12']' returned non-zero exit status 1.
+torch._inductor.exc.InductorError: CalledProcessError: Command '['/usr/bin/gcc', '/root/exp/.venv/lib/python3.12/site-packages/triton/backends/nvidia/driver.c', '-O3', '-shared', '-fPIC', '-Wno-psabi', '-o', '/tmp/tmp21nqrygb/cuda_utils.cpython-312-x86_64-linux-gnu.so', '-l:libcuda.so.1', '-L/root/exp/.venv/lib/python3.12/site-packages/triton/backends/nvidia/lib', '-L/lib/x86_64-linux-gnu', '-I/root/exp/.venv/lib/python3.12/site-packages/triton/backends/nvidia/include', '-I/tmp/tmp21nqrygb', '-I/usr/include/python3.12']' returned non-zero exit status 1.
 
 Set TORCHDYNAMO_VERBOSE=1 for the full Dynamo stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS="+dynamo"
 
-[01:40:10] experiment.sh FAILED (exit 1)
-[01:40:10] deadline moved in to 02:40 UTC: experiment failed
+[01:56:11] experiment.sh FAILED (exit 1)
+[01:56:11] deadline moved in to 02:56 UTC: experiment failed
+[02:01:22] installing python packages: torch numpy
+name, memory.total [MiB]
+NVIDIA H100 80GB HBM3, 81559 MiB
+[02:01:27] starting experiment.sh
+[02:01:27] data ready
+proj check ok, nonzero frac 0.4380595088005066
+[02:01:28] start floor seed 0 (1/15)
+[02:02:11] done floor seed 0: {"arm": "floor", "seed": 0, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 3.007064414024353, "final_val_bpb": 4.338276917746612, "elapsed_s": 30.386964797973633, "tokens_per_s": 2695892.812745249, "nonfinite_steps": 0, "first_step_s": 8.0}
+[02:02:11] start box seed 0 (2/15)
+[02:02:53] done box seed 0: {"arm": "box", "seed": 0, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 3.523639643192291, "final_val_bpb": 5.083537439113275, "elapsed_s": 30.456791162490845, "tokens_per_s": 2689712.1092943246, "nonfinite_steps": 0, "first_step_s": 7.3}
+[02:02:53] progress 2/15, projected finish 02:12 UTC
+[02:02:53] deadline moved in to 02:37 UTC: projected from progress
+[02:02:53] start l1 seed 0 (3/15)
+[02:04:48] done l1 seed 0: {"arm": "l1", "seed": 0, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.3240213453769685, "final_val_bpb": 1.910159029006486, "elapsed_s": 86.37859392166138, "tokens_per_s": 948383.1153155263, "nonfinite_steps": 0, "first_step_s": 25.0}
+[02:04:48] progress 3/15, projected finish 02:18 UTC
+[02:04:48] start shrink seed 0 (4/15)
+[02:05:30] done shrink seed 0: {"arm": "shrink", "seed": 0, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 2.873846638202667, "final_val_bpb": 4.146084293210407, "elapsed_s": 29.766201496124268, "tokens_per_s": 2752114.6764617064, "nonfinite_steps": 0, "first_step_s": 7.5}
+[02:05:30] progress 4/15, projected finish 02:16 UTC
+[02:05:30] start ceiling seed 0 (5/15)
+[02:06:31] done ceiling seed 0: {"arm": "ceiling", "seed": 0, "n_params": 10844160, "steps_done": 5000, "final_val_loss": 1.1166839599609375, "final_val_bpb": 1.6110344112758943, "elapsed_s": 46.652140617370605, "tokens_per_s": 1755975.158179508, "nonfinite_steps": 0, "first_step_s": 10.4}
+[02:06:31] progress 5/15, projected finish 02:16 UTC
+[02:06:31] start floor seed 1 (6/15)
+[02:07:06] done floor seed 1: {"arm": "floor", "seed": 1, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.2956356763839723, "final_val_bpb": 1.8692071651179747, "elapsed_s": 29.711477994918823, "tokens_per_s": 2757183.604733825, "nonfinite_steps": 0, "first_step_s": 1.9}
+[02:07:06] progress 6/15, projected finish 02:15 UTC
+[02:07:06] start box seed 1 (7/15)
+[02:07:42] done box seed 1: {"arm": "box", "seed": 1, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 3.4942009925842283, "final_val_bpb": 5.04106644387056, "elapsed_s": 30.194352626800537, "tokens_per_s": 2713090.1269029933, "nonfinite_steps": 0, "first_step_s": 1.8}
+[02:07:42] progress 7/15, projected finish 02:14 UTC
+[02:07:42] start l1 seed 1 (8/15)
+[02:09:15] done l1 seed 1: {"arm": "l1", "seed": 1, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.2508327126502992, "final_val_bpb": 1.8045701515222765, "elapsed_s": 86.70688390731812, "tokens_per_s": 944792.3429881892, "nonfinite_steps": 0, "first_step_s": 2.2}
+[02:09:15] progress 8/15, projected finish 02:16 UTC
+[02:09:15] start shrink seed 1 (9/15)

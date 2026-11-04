@@ -1,0 +1,12 @@
+{
+  "arm": "shrink",
+  "seed": 0,
+  "n_params": 3750144,
+  "steps_done": 5000,
+  "final_val_loss": 2.873846638202667,
+  "final_val_bpb": 4.146084293210407,
+  "elapsed_s": 29.766201496124268,
+  "tokens_per_s": 2752114.6764617064,
+  "nonfinite_steps": 0,
+  "first_step_s": 7.5
+}
