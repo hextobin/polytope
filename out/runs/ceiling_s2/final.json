@@ -1,0 +1,12 @@
+{
+  "arm": "ceiling",
+  "seed": 2,
+  "n_params": 10844160,
+  "steps_done": 5000,
+  "final_val_loss": 1.0824074566364288,
+  "final_val_bpb": 1.5615838699106115,
+  "elapsed_s": 46.22547626495361,
+  "tokens_per_s": 1772182.9306950506,
+  "nonfinite_steps": 0,
+  "first_step_s": 2.0
+}

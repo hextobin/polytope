@@ -1,0 +1,15 @@
+arm=l1 params=3,750,144 device=cuda
+step      0  val 5.5549  (1s) | L5: changed=1.000 coords=1.000 nnz~=0.115
+/root/exp/.venv/lib/python3.12/site-packages/triton/knobs.py:504: UserWarning: TRITON_DEFAULT_FP_FUSION is unset: defaulting to FP fusion ENABLED for backward compatibility in Triton 3.9. The default will change to DISABLED in Triton 3.10; set TRITON_DEFAULT_FP_FUSION=1 to keep fusion enabled or =0 to adopt the new default early and silence this warning.
+  warn_once(FP_FUSION_DEFAULT_WARNING)
+step    500  val 2.8690  (9s) | L5: changed=1.000 coords=1.000 nnz~=0.284
+step   1000  val 1.9405  (18s) | L5: changed=1.000 coords=1.000 nnz~=0.380
+step   1500  val 1.6577  (26s) | L5: changed=1.000 coords=1.000 nnz~=0.398
+step   2000  val 1.5116  (35s) | L5: changed=1.000 coords=1.000 nnz~=0.401
+step   2500  val 1.4315  (44s) | L5: changed=1.000 coords=1.000 nnz~=0.401
+step   3000  val 1.3807  (52s) | L5: changed=1.000 coords=1.000 nnz~=0.401
+step   3500  val 1.3462  (60s) | L5: changed=1.000 coords=1.000 nnz~=0.404
+step   4000  val 1.3223  (69s) | L5: changed=1.000 coords=1.000 nnz~=0.404
+step   4500  val 1.3065  (78s) | L5: changed=1.000 coords=1.000 nnz~=0.404
+step   5000  val 1.3024  (86s) | L5: changed=1.000 coords=1.000 nnz~=0.406
+{"arm": "l1", "seed": 2, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.3023797631263734, "final_val_bpb": 1.8789368256165617, "elapsed_s": 86.03971934318542, "tokens_per_s": 952118.4009590598, "nonfinite_steps": 0, "first_step_s": 2.1}

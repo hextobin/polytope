@@ -10,3 +10,6 @@ step   2500  val 1.3842  (15s) | L5: changed=1.000 coords=1.000 nnz~=0.375
 step   3000  val 1.3408  (18s) | L5: changed=1.000 coords=1.000 nnz~=0.375
 step   3500  val 1.3054  (21s) | L5: changed=1.000 coords=1.000 nnz~=0.378
 step   4000  val 1.2837  (24s) | L5: changed=1.000 coords=1.000 nnz~=0.378
+step   4500  val 1.2669  (27s) | L5: changed=1.000 coords=1.000 nnz~=0.378
+step   5000  val 1.2597  (30s) | L5: changed=1.000 coords=1.000 nnz~=0.380
+{"arm": "shrink", "seed": 1, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.2596816539764404, "final_val_bpb": 1.8173364752906178, "elapsed_s": 29.77890372276306, "tokens_per_s": 2750940.758688177, "nonfinite_steps": 0, "first_step_s": 2.0}

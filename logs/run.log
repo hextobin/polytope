@@ -93,3 +93,43 @@ proj check ok, nonzero frac 0.4380595088005066
 [02:09:15] done l1 seed 1: {"arm": "l1", "seed": 1, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.2508327126502992, "final_val_bpb": 1.8045701515222765, "elapsed_s": 86.70688390731812, "tokens_per_s": 944792.3429881892, "nonfinite_steps": 0, "first_step_s": 2.2}
 [02:09:15] progress 8/15, projected finish 02:16 UTC
 [02:09:15] start shrink seed 1 (9/15)
+[02:09:51] done shrink seed 1: {"arm": "shrink", "seed": 1, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.2596816539764404, "final_val_bpb": 1.8173364752906178, "elapsed_s": 29.77890372276306, "tokens_per_s": 2750940.758688177, "nonfinite_steps": 0, "first_step_s": 2.0}
+[02:09:51] progress 9/15, projected finish 02:15 UTC
+[02:09:51] start ceiling seed 1 (10/15)
+[02:10:43] done ceiling seed 1: {"arm": "ceiling", "seed": 1, "n_params": 10844160, "steps_done": 5000, "final_val_loss": 1.091813224554062, "final_val_bpb": 1.5751535246411335, "elapsed_s": 45.9719352722168, "tokens_per_s": 1781956.7419757608, "nonfinite_steps": 0, "first_step_s": 2.1}
+[02:10:43] progress 10/15, projected finish 02:15 UTC
+[02:10:43] start floor seed 2 (11/15)
+[02:11:18] done floor seed 2: {"arm": "floor", "seed": 2, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.3164097845554352, "final_val_bpb": 1.899177867955835, "elapsed_s": 29.629817008972168, "tokens_per_s": 2764782.5153693627, "nonfinite_steps": 0, "first_step_s": 1.8}
+[02:11:18] progress 11/15, projected finish 02:14 UTC
+[02:11:18] start box seed 2 (12/15)
+[02:11:55] done box seed 2: {"arm": "box", "seed": 2, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 3.523303246498108, "final_val_bpb": 5.083052121270805, "elapsed_s": 30.247788906097412, "tokens_per_s": 2708297.133860465, "nonfinite_steps": 0, "first_step_s": 1.9}
+[02:11:55] progress 12/15, projected finish 02:14 UTC
+[02:11:55] start l1 seed 2 (13/15)
+[02:13:27] done l1 seed 2: {"arm": "l1", "seed": 2, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 1.3023797631263734, "final_val_bpb": 1.8789368256165617, "elapsed_s": 86.03971934318542, "tokens_per_s": 952118.4009590598, "nonfinite_steps": 0, "first_step_s": 2.1}
+[02:13:27] progress 13/15, projected finish 02:15 UTC
+[02:13:27] start shrink seed 2 (14/15)
+[02:14:02] done shrink seed 2: {"arm": "shrink", "seed": 2, "n_params": 3750144, "steps_done": 5000, "final_val_loss": 2.339732491970062, "final_val_bpb": 3.375520463171985, "elapsed_s": 29.964112043380737, "tokens_per_s": 2733937.180631276, "nonfinite_steps": 0, "first_step_s": 1.9}
+[02:14:02] progress 14/15, projected finish 02:14 UTC
+[02:14:02] start ceiling seed 2 (15/15)
+[02:14:55] done ceiling seed 2: {"arm": "ceiling", "seed": 2, "n_params": 10844160, "steps_done": 5000, "final_val_loss": 1.0824074566364288, "final_val_bpb": 1.5615838699106115, "elapsed_s": 46.22547626495361, "tokens_per_s": 1772182.9306950506, "nonfinite_steps": 0, "first_step_s": 2.0}
+[02:14:55] progress 15/15, projected finish 02:14 UTC
+| arm | seeds | params | val bpb (mean ± sd) | Δ vs floor | > 2 sd? | tok/s | non-finite steps | tokens changed | coords changed | nonzero (median) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ceiling | 3 | 10,844,160 | 1.5826 ± 0.0256 | -1.1196 | no | 1,770,038 | 0 | 0.000 | 0.000 | 1.000 |
+| l1 | 3 | 3,750,144 | 1.8646 ± 0.0542 | -0.8377 | no | 948,431 | 0 | 1.000 | 1.000 | 0.346 |
+| floor | 3 | 3,750,144 | 2.7022 ± 1.4169 | - | - | 2,739,286 | 0 | 0.000 | 0.000 | 1.000 |
+| shrink | 3 | 3,750,144 | 3.1130 ± 1.1864 | +0.4108 | no | 2,745,664 | 0 | 1.000 | 1.000 | 0.331 |
+| box | 3 | 3,750,144 | 5.0692 ± 0.0244 | +2.3670 | no | 2,703,700 | 0 | 1.000 | 0.472 | 1.000 |
+
+Per layer at the last eval (mean over seeds): tokens changed / coords changed / nonzero median / tau (l1)
+
+| layer | box | l1 | shrink |
+|---|---|---|---|
+| emb | 1.000 / 0.336 / 1.000 | 1.000 / 1.000 / 0.434 / 0.762 | 1.000 / 1.000 / 0.437 |
+| L0 | 1.000 / 0.384 / 1.000 | 1.000 / 1.000 / 0.306 / 0.657 | 1.000 / 1.000 / 0.345 |
+| L1 | 1.000 / 0.407 / 1.000 | 1.000 / 1.000 / 0.252 / 0.512 | 1.000 / 1.000 / 0.317 |
+| L2 | 1.000 / 0.455 / 1.000 | 1.000 / 1.000 / 0.292 / 0.529 | 1.000 / 1.000 / 0.275 |
+| L3 | 1.000 / 0.522 / 1.000 | 1.000 / 1.000 / 0.390 / 0.683 | 1.000 / 1.000 / 0.242 |
+| L4 | 1.000 / 0.568 / 1.000 | 1.000 / 1.000 / 0.387 / 0.714 | 1.000 / 1.000 / 0.346 |
+| L5 | 1.000 / 0.488 / 1.000 | 1.000 / 1.000 / 0.407 / 0.739 | 1.000 / 1.000 / 0.447 |
+[02:14:55] experiment finished
