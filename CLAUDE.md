@@ -54,5 +54,17 @@ Design, arms and predictions are in README.md. Don't change the predictions.
 - **Box:** `box/experiment.sh` downloads enwik8, checks the projection on the
   GPU, then runs 15 units (all arms at seed 0, then 1, then 2) to
   `$OUT/runs/<arm>_s<seed>` and writes `$OUT/summary.md`. `DEADLINE_HOURS=3`.
-- **Next:** recommend a box from `./launch.sh --check` and get the user's OK
-  on the price; then the user runs `./launch.sh`. Then check `git fetch origin results`.
+
+## Handoff: first launch cancelled (2026-11-04), next phase is design
+
+- **Why:** the user cancelled to restart with an agent on the box that they can
+  check in with periodically. Droplet list confirmed empty; no results were kept.
+- **Design still open:** how the agent runs, authenticates and is reached. Until
+  it's settled, keep self-destruct and the deadline working without any agent.
+  The change belongs in hextobin/gpu-experiment-template.
+- **Capacity:** the 48GB sizes and H100 had no regions on 2026-11-04;
+  `gpu-h200x1-141gb` (atl1, nyc2, $4.47/hr) did and launched. If the GPU differs
+  from the README's "one 48GB GPU", name it in the write-up. Don't change the
+  predictions.
+- **`doctl`:** can't run in the sandbox, so the user runs it. Get a fresh price OK
+  before relaunching.
