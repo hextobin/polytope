@@ -21,6 +21,12 @@
   tokens in chat.
 - Check progress from the `results` branch (`git fetch origin results`), not by
   watching the box.
+- After launch, offer an on-box session, which the user can check in with from
+  the sidebar. It needs no API key and no box script changes: the user saves an
+  SSH connection in the Claude app to the IP `launch.sh` printed (`root@<ip>`),
+  then start it with `start_session` (`target: "ssh"`, `host` from
+  `list_start_targets`, repo at `/root/exp`). It uses the user's plan and ends
+  with the box. It's optional: nothing on the box may depend on it.
 - After the run: confirm `doctl compute droplet list` is empty, then rewrite
   README.md in the `WRITEUP.md` format (Question/Answer first, results table,
   findings, predictions vs outcome, reproduce). If work continues, add a short
